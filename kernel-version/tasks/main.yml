@@ -1,0 +1,20 @@
+---
+  - name: Verfiying existing  version of Kernel
+    command: uname -r
+    become: true
+    register: kernelversion_initial
+    when: reboot_confirmation == "yes"
+
+  - name: Installing Latest kernel version in {{ ansible_hostname }}
+    command: yum -y update kernel*
+    when: reboot_confirmation == "yes"
+    register: kernel_update
+
+  - debug: var=kernel_update
+ 
+  - name: Check for existing update with server Reboot
+    shell: if [ $(rpm -q kernel|tail -n 1) != kernel-$(uname -r) ]; then echo 'update'; fi
+    ignore_errors: true
+    register: update_needed
+   
+  - debug: var=update_needed

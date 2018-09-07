@@ -1,0 +1,22 @@
+---
+  - name: Starting Artifcatory & Nginx Services
+    service:
+      name: "{{ item }}"
+      state: started
+      enabled: yes
+    when: nginx_status.changed
+    ignore_errors: yes
+    with_items:
+      - artifactory
+      - nginx
+
+  - name: Starting Artifcatory & Httpd Services
+    service:
+      name: "{{ item }}"
+      state: started
+      enabled: yes
+    when: httpd_status.changed
+    ignore_errors: yes
+    with_items:
+      - artifactory
+      - httpd
