@@ -1,0 +1,36 @@
+---
+  - name: Check if Httpd is running
+    command: systemctl status httpd
+    ignore_errors: yes
+    register: service_httpd_status
+    when: update_needed.stdout == "update"    
+
+  - name: Check if Nginx is running
+    command: systemctl status nginx
+    ignore_errors: yes
+    register: service_nginx_status
+    when: update_needed.stdout == "update"
+
+  - name: Stopping Artifcatory & Nginx Services
+    service:
+      name: "{{ item }}"
+      state: stopped
+      enabled: no
+    when: (update_needed.stdout == "update") and service_httpd_status is failed
+    register: nginx_status
+    ignore_errors: yes
+    with_items:
+      - artifactory
+      - nginx
+
+  - name: Stopping Artifcatory & Httpd Services
+    service:
+      name: "{{ item }}"
+      state: stopped
+      enabled: no
+    when: (update_needed.stdout == "update") and service_nginx_status is failed
+    register: httpd_status
+    ignore_errors: yes
+    with_items:
+      - artifactory
+      - httpd
